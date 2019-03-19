@@ -1,0 +1,378 @@
+# 6 链表
+
+++链表通常由一连串节点组成，每个节点包含任意的实例数据和1个或者2个用来指向上一个或者下一个节点位置的链接++
+
+一个node节点通常长这个样子
+
+node |
+:--: |
+data数据 |
+next指针 |
+previous指针 |
+
+
+## 6.1 单向链表
+
+单向链表是链表结构中最简单的，一个单链表的节点（node）分为两部分，第一部分（data）保存和显示节点的相关信息，另一个部分（next）存储下一个节点的地址。最后一个节点存储地址部分指向空值（null）。
+
+在链表中头节点（header）比较特殊，头节点data部分不存储值，next指向第一个存储值的节点。
+
+```
+graph LR
+header-->nodeA; nodeA --> nodeB; nodeB--> nodeC
+```
+
+
+### 6.2 单向链表的方法和属性
+
+链表的方法和属性 | 含义
+---|---
+element(属性) | 链表的元素(可以是任意类型)
+next（属性） | 链表节点指向下一元素的指针
+find(方法) | 查找链表中对应的节点
+findPrevious(方法) | 获取需要查找节点的上一个节点
+insert(方法) | 在链表中插入某个节点
+remove(方法) | 在链表中删除某个节点
+display(方法) | 显示整个链表中的数据部分
+
+### 6.2.1 插入节点
+
+在链表中插入新节点就需要明确指出需要在哪个节点前面或者后面插入。我们以在某个节点后面插入一个节点为例。
+
+在某个节点（节点A）后插入节点，需要把节点A的next指针指向新节点，同时把新节点的next指针指向节点A的后一个节点
+
+
+插入前
+```
+graph LR
+header-->nodeA;nodeA --> nodeB; nodeB-->nodeC
+```
+插入后
+
+```
+graph LR
+header-->nodeA;nodeA-->新节点;新节点-->nodeB;nodeB --> nodeC
+```
+
+### 6.2.2 删除节点
+
+在链表中删除节点时，需要找到待删除节点的前面节点。找到这个节点后，修改它的next指针，使其不再指向待删除的节点，而是指向待删除节点的下一个节点。比如删除新节点.
+
+删除前
+```
+graph LR
+header-->nodeA;nodeA-->新节点;新节点-->nodeB;nodeB --> nodeC
+```
+
+删除后
+```
+graph LR
+header-->nodeA;nodeA --> nodeB; nodeB-->nodeC
+```
+
+
+### 6.3 实现单向链表
+
+书中的代码比较老旧，也有很多地方有错误。我稍加更正后代码如下
+ 
+ ```javascript
+ class Node {
+  constructor (ele) {
+    this.element = ele
+    this.next = null
+  }
+}
+class singleLinkedList {
+  constructor () {
+    this.head = new Node()
+  }
+  // 在链表中查找节点。查找是根据节点的内容进行查找的。如果找不到对应的节点，则返回链表的最后一个节点。如果链表是空的，则返回header节点
+  find (ele) {
+    let curNode = this.head
+    if (ele) {
+      while (curNode.element != ele && curNode.next) {
+        curNode = curNode.next
+      }
+    } else {
+      while (curNode.next) {
+        curNode = curNode.next
+      }
+    }
+    return curNode
+  }
+  // 在链表中已有得节点后插入一个节点。如果已有的节点不存在，则在head节点后插入节点、
+  insert (newEle, ele) {
+    let newNode = new Node(newEle)
+    let current = this.find(ele)
+    newNode.next = current.next
+    current.next = newNode
+  }
+  // 获取需要查找的节点的上一个节点，如果链表中没有对应的节点，则链表的最后一个节点，如果链表是空的，则返回header节点
+  findPrevious (ele) {
+    let curNode = this.head
+    if (ele) {
+      while (curNode.next && curNode.next.element != ele) {
+        curNode = curNode.next
+      }
+    } else {
+      while (curNode.next) {
+        curNode = curNode.next
+      }
+    }
+
+    return curNode
+  }
+  // 从列表删除节点
+  remove (ele) {
+    let preNode = this.findPrevious(ele)
+    if (preNode.next) {
+      preNode.next = preNode.next.next
+    } else {
+      preNode.next = null
+    }
+  }
+  // 显示该链表的所有节点
+  display () {
+    let curNode = this.head
+    let str = ''
+    while (curNode.next) {
+      str += curNode.next.element
+      curNode = curNode.next
+    }
+    console.log(str)
+  }
+}
+ ```
+测试
+```javascript
+
+let sList = new singleLinkedList()
+sList.insert('a')
+sList.insert('b')
+sList.insert('c')
+sList.display()  // abc
+sList.insert('d', 'a')
+sList.display() // adbc
+sList.remove('b')
+sList.display() // adc
+
+```
+
+## 6.4 双向链表
+
+单向链表从头节点遍历到尾节点比较简单，但是从后向前遍历就比较麻烦。我们可以给node节点增加一个属性，该属性存储指向前驱节点的链接。这样就容易很多.
+
+
+双向链表示意图
+
+```
+graph LR
+header --> |prev|null;
+header-->|next|nodeA;
+nodeA-->|prev|header;
+nodeA-->|next|nodeB;
+nodeB-->|prev|nodeA;
+nodeB-->|next|nodeC;
+nodeC-->|prev|nodeB;
+nodeC-->|next|Null;
+```
+
+双向链表的代码实现
+```javascript
+class Node {
+  constructor (ele) {
+    this.element = ele
+    this.next = null
+    this.prev = null
+  }
+}
+class twoWayLinkedList {
+  constructor () {
+    this.head = new Node()
+  }
+  // 在链表中查找节点。查找是根据节点的内容进行查找的。如果找不到对应的节点，则返回链表的最后一个节点。如果链表是空的，则返回header节点
+  find (ele) {
+    let curNode = this.head
+    if (ele) {
+      while (curNode.element != ele && curNode.next) {
+        curNode = curNode.next
+      }
+    } else {
+      while (curNode.next) {
+        curNode = curNode.next
+      }
+    }
+    return curNode
+  }
+  // 在链表中已有得节点后插入一个节点。如果已有的节点不存在，则在head节点后插入节点、
+  insert (newEle, ele) {
+    let newNode = new Node(newEle)
+    let current = this.find(ele)
+    newNode.next = current.next
+    // 链表的最后一个节点时不需要为null设置prev
+    if (current.next) {
+      current.next.prev = newNode
+    }
+    newNode.prev = current
+    current.next = newNode
+  }
+
+  // 从列表删除节点
+  remove (ele) {
+    let curNode = this.find(ele)
+    // 不能删除头节点
+    if (curNode != this.head) {
+      // 只有链表节点的下个节点不为null才需要设置prev。比如链表的最后一个节点就不需要设置prev
+      if (curNode.next) {
+        curNode.next.prev = curNode.prev
+      }
+      curNode.prev.next = curNode.next
+      // 清空节点
+      curNode.prev = null
+      curNode.next = null
+    }
+  }
+  // 显示该链表的所有节点
+  display () {
+    let curNode = this.head
+    let str = ''
+    while (curNode.next) {
+      str += curNode.next.element
+      curNode = curNode.next
+    }
+    console.log(str)
+  }
+}
+```
+
+对双向链表进行测试
+```javascript
+let sList = new twoWayLinkedList()
+sList.insert('a')
+sList.insert('b')
+sList.insert('c')
+sList.display() // abc
+sList.insert('d', 'a')
+sList.display() // adbc
+sList.remove('b')
+sList.display() // adc
+```
+
+## 6.5 循环链表
+
+循环链表和单向链表相似，节点类型都是一样的。唯一的区别是创建循环链表的时候头部节点head的next指向的是自身。
+
+
+
+循环链表示意图
+
+
+```
+graph LR
+header-->|next|nodeA;
+nodeA -->|next|nodeB;
+nodeB -->|next|nodeC
+nodeC -->|next|header
+```
+
+循环链表的程序实现
+
+```javascript
+class Node {
+  constructor (ele) {
+    this.element = ele
+    this.next = null
+  }
+}
+class loopLinkedList {
+  constructor () {
+    this.head = new Node()
+    this.head.next = this.head
+  }
+  // 在链表中查找节点。查找是根据节点的内容进行查找的。如果找不到对应的节点，则返回链表的最后一个节点。如果是空链表则返回head节点。
+  find (ele) {
+    let headNode = this.head
+    let curNode = this.head
+    if (ele) {
+      while (curNode.element != ele && curNode.next != headNode) {
+        curNode = curNode.next
+      }
+    } else {
+      while (curNode.next != headNode) {
+        curNode = curNode.next
+      }
+    }
+    return curNode
+  }
+  // 获取需要查找的节点的上一个节点，如果链表中没有对应的节点，则链表的最后一个节点，如果链表是空的，则返回header节点
+  findPrevious (ele) {
+    let headNode = this.head
+    let curNode = this.head
+    if (ele) {
+      while (curNode.next.element != ele && curNode.next != headNode) {
+        curNode = curNode.next
+      }
+    } else {
+      while (curNode.next != headNode) {
+        curNode = curNode.next
+      }
+    }
+
+    return curNode
+  }
+  // 在链表中已有得节点后插入一个节点。如果已有的节点不存在，则在head节点后插入节点、
+  insert (newEle, ele) {
+    let newNode = new Node(newEle)
+    let current = this.find(ele)
+    newNode.next = current.next
+    current.next = newNode
+  }
+
+  // 从列表删除节点
+  remove (ele) {
+    let prevNode = this.findPrevious(ele)
+
+    // 如果是最后一个节点的话要做特殊处理，不能删除头节点
+    if (prevNode.next != this.head) {
+      prevNode.next = prevNode.next.next
+    }
+  }
+  // 显示该链表的所有节点
+  display () {
+    let headNode = this.head
+    let curNode = this.head
+    let str = ''
+    while (curNode.next != headNode) {
+      str += curNode.next.element
+      curNode = curNode.next
+    }
+    console.log(str)
+  }
+}
+```
+
+测试
+```javascript
+let sList = new loopLinkedList()
+sList.insert('a')
+sList.insert('b')
+sList.insert('c')
+sList.display() // abc
+sList.insert('d', 'c')
+sList.display() // abcd
+sList.remove('d')
+sList.display() // abc
+```
+
+自此链表所有的知识点都讲解完成了。
+
+**个人总结：这一章知识点都讲道理，就是作者的代码写的比较乱,而且漏洞很多。明显作者没有经过测试。不过也有一些地方，我刚开始以为作者错了，可是等到自己写代码实现的时候才发现是对的**
+
+
+
+
+
+
+
+
+
