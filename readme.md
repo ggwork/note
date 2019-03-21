@@ -19,7 +19,7 @@
 ### 3.vue
 
 - [vuepress爬坑之旅](./vue/vuepress爬坑之旅.md)
-- [vuex再入门.md](./vue/vuex再入门.md)
+- [vuex再入门-基础用法.md](./vue/vuex再入门-基础用法.md)
 
 ### 4. webgl编程指南
 
