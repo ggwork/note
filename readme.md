@@ -20,6 +20,7 @@
 
 - [vuepress爬坑之旅](./vue/vuepress爬坑之旅.md)
 - [vuex再入门-基础用法.md](./vue/vuex再入门-基础用法.md)
+- [vuex再入门-模块用法](./vue/vuex再入门-模块用法.md)
 
 ### 4. webgl编程指南
 
